@@ -43,7 +43,7 @@ import csv
 import optparse
 import os
 import struct
-import urllib
+import urllib.parse
 
 
 def ReadCollectedKeyboards(stream):
@@ -112,7 +112,7 @@ def WriteKeyboardData(keyboard_value, stream):
   # c.f. usage_stats/usage_stats_uploader.cc
   keys = ('sxa', 'sya', 'sxv', 'syv', 'dxa', 'dya', 'dxv', 'dyv')
   stream.write(struct.pack('>i', len(keyboard_value)))
-  for source_id, source_value in keyboard_value.iteritems():
+  for source_id, source_value in sorted(keyboard_value.items()):
     stream.write(struct.pack('>i', source_id))
     # Note that we are calculating
     # "Average of average" and "Average of variance".
@@ -124,10 +124,10 @@ def WriteKeyboardData(keyboard_value, stream):
 
 
 def WriteData(stats, output_dir):
-  for base_name_orientation in stats.iterkeys():
+  for base_name_orientation in stats.keys():
     with open(os.path.join(output_dir,
                            '%s_%s.touch_stats' % (
-                               urllib.unquote(base_name_orientation[0]),
+                               urllib.parse.unquote(base_name_orientation[0]),
                                base_name_orientation[1])),
               'wb') as stream:
       WriteKeyboardData(stats[base_name_orientation], stream)

@@ -44,8 +44,9 @@ import multiprocessing
 import optparse
 import os
 import subprocess
+import sys
 import time
-from xml.etree import cElementTree as ElementTree
+from xml.etree import ElementTree
 from build_tools import android_util
 from build_tools.test_tools import gtest_report
 
@@ -142,9 +143,9 @@ def AppendPrefixToSuiteName(in_file_name, out_file_name, prefix):
     AppendPrefix(root)
   for elem in root.findall('testsuite'):
     AppendPrefix(elem)
-  with open(out_file_name, 'w') as f:
+  with open(out_file_name, 'wb') as f:
     # Note that ElementTree of 2.6 doesn't write XML declaration.
-    f.write('<?xml version="1.0" encoding="utf-8"?>\n')
+    f.write(b'<?xml version="1.0" encoding="utf-8"?>\n')
     f.write(ElementTree.tostring(root, 'utf-8'))
 
 
@@ -156,7 +157,7 @@ class AndroidDevice(android_util.AndroidDevice):
     """Wait until SD card is mounted."""
     retry = 10
     sleep = 30
-    for _ in xrange(retry):
+    for _ in range(retry):
       if self._RunCommand('mount').find('/sdcard') != -1:
         self.GetLogger().info('SD card has been mounted.')
         return
@@ -458,7 +459,7 @@ def main():
 
   if not options.android_home:
     logging.error('--android_home option must be specified.')
-    os.exit(1)
+    sys.exit(1)
 
   if options.run_native_test:
     binaries = FindTestBinaries(options.test_bin_dir)
@@ -501,11 +502,11 @@ def main():
   # result.get() blocks until the test terminates.
   error_messages = [result.get() for result in results if result.get()]
   if error_messages:
-    print '[FAIL] Native tests result : Test failures are found;'
+    print('[FAIL] Native tests result : Test failures are found;')
     for message in error_messages:
-      print message
+      print(message)
   else:
-    print '[ OK ] Native tests result : Tests scceeded.'
+    print('[ OK ] Native tests result : Tests scceeded.')
 
 
 if __name__ == '__main__':

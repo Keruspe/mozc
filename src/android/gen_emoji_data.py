@@ -48,23 +48,23 @@ from build_tools import code_generator_util
 # We assign 100,000 and greater values for carrier emoji, so "offset" should be
 # less than 100,000.
 _CATEGORY_MAP = {
-  'SMILEY_PEOPLE': {'category': 'FACE', 'offset': 0},
-  'ANIMALS_NATURE': {'category': 'FOOD', 'offset': 0},
-  'FOOD_DRINK': {'category': 'FOOD', 'offset': 10000},
-  'TRAVEL_PLACES': {'category': 'CITY', 'offset': 0},
-  'ACTIVITY': {'category': 'ACTIVITY', 'offset': 0},
-  'OBJECTS': {'category': 'ACTIVITY', 'offset': 10000},
-  'SYMBOLS': {'category': 'NATURE', 'offset': 0},
-  'FLAGS': {'category': 'NATURE', 'offset': 10000},
+  b'SMILEY_PEOPLE': {'category': b'FACE', 'offset': 0},
+  b'ANIMALS_NATURE': {'category': b'FOOD', 'offset': 0},
+  b'FOOD_DRINK': {'category': b'FOOD', 'offset': 10000},
+  b'TRAVEL_PLACES': {'category': b'CITY', 'offset': 0},
+  b'ACTIVITY': {'category': b'ACTIVITY', 'offset': 0},
+  b'OBJECTS': {'category': b'ACTIVITY', 'offset': 10000},
+  b'SYMBOLS': {'category': b'NATURE', 'offset': 0},
+  b'FLAGS': {'category': b'NATURE', 'offset': 10000},
 }
-_CATEGORY_LIST = list(set(
-    [entry['category'] for entry in _CATEGORY_MAP.itervalues()]))
+_CATEGORY_LIST = sorted(set(
+    [entry['category'] for entry in _CATEGORY_MAP.values()]))
 
 
 def ReadData(stream):
   category_map = defaultdict(list)
   stream = code_generator_util.SkipLineComment(stream)
-  stream = code_generator_util.ParseColumnStream(stream, delimiter='\t')
+  stream = code_generator_util.ParseColumnStream(stream, delimiter=b'\t')
   stream = code_generator_util.SelectColumn(stream, [0, 2, 8, 9, 10, 11, 12])
   for (code, pua_code, japanese_name, docomo_name, softbank_name, kddi_name,
        category_index) in stream:
@@ -76,19 +76,19 @@ def ReadData(stream):
       sys.exit(-1)
     if not code:
       # Use dummy code point
-      code = '0'
+      code = b'0'
     if not pua_code:
       # Use dummy code point
-      pua_code = '0'
-    if pua_code[0] == '>':
+      pua_code = b'0'
+    if pua_code[0:1] == b'>':
       # Don't skip entires which has non-primary PUA codepoint since they also
       # has unique Unicode codepoint.
       # e.g. "BLACK SQUARE BUTTON" and "LARGE BLUE CIRCLE"
       pua_code = pua_code[1:]
 
-    code_values = [int(c, 16) for c in re.split(r' +', code.strip())]
+    code_values = [int(c, 16) for c in re.split(br' +', code.strip())]
     pua_code_value = int(pua_code, 16)
-    (category, index) = category_index.split('-')
+    (category, index) = category_index.split(b'-')
     index = int(index) + _CATEGORY_MAP[category]['offset']
     category = _CATEGORY_MAP[category]['category']
     category_map[category].append(
@@ -98,92 +98,92 @@ def ReadData(stream):
 
 
 _CHARACTER_NORMALIZE_MAP = {
-    u'Ａ': 'A',
-    u'Ｂ': 'B',
-    u'Ｃ': 'C',
-    u'Ｄ': 'D',
-    u'Ｅ': 'E',
-    u'Ｆ': 'F',
-    u'Ｇ': 'G',
-    u'Ｈ': 'H',
-    u'Ｉ': 'I',
-    u'Ｊ': 'J',
-    u'Ｋ': 'K',
-    u'Ｌ': 'L',
-    u'Ｍ': 'M',
-    u'Ｎ': 'N',
-    u'Ｏ': 'O',
-    u'Ｐ': 'P',
-    u'Ｑ': 'Q',
-    u'Ｒ': 'R',
-    u'Ｓ': 'S',
-    u'Ｔ': 'T',
-    u'Ｕ': 'U',
-    u'Ｖ': 'V',
-    u'Ｗ': 'W',
-    u'Ｘ': 'X',
-    u'Ｙ': 'Y',
-    u'Ｚ': 'Z',
+    'Ａ': 'A',
+    'Ｂ': 'B',
+    'Ｃ': 'C',
+    'Ｄ': 'D',
+    'Ｅ': 'E',
+    'Ｆ': 'F',
+    'Ｇ': 'G',
+    'Ｈ': 'H',
+    'Ｉ': 'I',
+    'Ｊ': 'J',
+    'Ｋ': 'K',
+    'Ｌ': 'L',
+    'Ｍ': 'M',
+    'Ｎ': 'N',
+    'Ｏ': 'O',
+    'Ｐ': 'P',
+    'Ｑ': 'Q',
+    'Ｒ': 'R',
+    'Ｓ': 'S',
+    'Ｔ': 'T',
+    'Ｕ': 'U',
+    'Ｖ': 'V',
+    'Ｗ': 'W',
+    'Ｘ': 'X',
+    'Ｙ': 'Y',
+    'Ｚ': 'Z',
 
-    u'ａ': 'a',
-    u'ｂ': 'b',
-    u'ｃ': 'c',
-    u'ｄ': 'd',
-    u'ｅ': 'e',
-    u'ｆ': 'f',
-    u'ｇ': 'g',
-    u'ｈ': 'h',
-    u'ｉ': 'i',
-    u'ｊ': 'j',
-    u'ｋ': 'k',
-    u'ｌ': 'l',
-    u'ｍ': 'm',
-    u'ｎ': 'n',
-    u'ｏ': 'o',
-    u'ｐ': 'p',
-    u'ｑ': 'q',
-    u'ｒ': 'r',
-    u'ｓ': 's',
-    u'ｔ': 't',
-    u'ｕ': 'u',
-    u'ｖ': 'v',
-    u'ｗ': 'w',
-    u'ｘ': 'x',
-    u'ｙ': 'y',
-    u'ｚ': 'z',
+    'ａ': 'a',
+    'ｂ': 'b',
+    'ｃ': 'c',
+    'ｄ': 'd',
+    'ｅ': 'e',
+    'ｆ': 'f',
+    'ｇ': 'g',
+    'ｈ': 'h',
+    'ｉ': 'i',
+    'ｊ': 'j',
+    'ｋ': 'k',
+    'ｌ': 'l',
+    'ｍ': 'm',
+    'ｎ': 'n',
+    'ｏ': 'o',
+    'ｐ': 'p',
+    'ｑ': 'q',
+    'ｒ': 'r',
+    'ｓ': 's',
+    'ｔ': 't',
+    'ｕ': 'u',
+    'ｖ': 'v',
+    'ｗ': 'w',
+    'ｘ': 'x',
+    'ｙ': 'y',
+    'ｚ': 'z',
 
-    u'０': '0',
-    u'１': '1',
-    u'２': '2',
-    u'３': '3',
-    u'４': '4',
-    u'５': '5',
-    u'６': '6',
-    u'７': '7',
-    u'８': '8',
-    u'９': '9',
+    '０': '0',
+    '１': '1',
+    '２': '2',
+    '３': '3',
+    '４': '4',
+    '５': '5',
+    '６': '6',
+    '７': '7',
+    '８': '8',
+    '９': '9',
 
-    u'（': '(',
-    u'）': ')',
+    '（': '(',
+    '）': ')',
 }
 
 
 def PreprocessName(name):
   if not name:
-    return 'null'
-  name = unicode(name, 'utf-8')
-  name = u''.join(_CHARACTER_NORMALIZE_MAP.get(c, c) for c in name)
+    return b'null'
+  name = str(name, 'utf-8')
+  name = ''.join(_CHARACTER_NORMALIZE_MAP.get(c, c) for c in name)
   name = name.encode('utf-8')
-  name = name.replace('(', '\\n(')
-  return '"%s"' % name
+  name = name.replace(b'(', b'\\n(')
+  return b'"%b"' % name
 
 
 def OutputData(category_map, stream):
-  for data_list in category_map.itervalues():
+  for data_list in category_map.values():
     data_list.sort()
 
-  stream.write('package org.mozc.android.inputmethod.japanese.emoji;\n'
-               'public class EmojiData {\n')
+  stream.write(b'package org.mozc.android.inputmethod.japanese.emoji;\n'
+               b'public class EmojiData {\n')
 
   for category in _CATEGORY_LIST:
     # The content of data list is
@@ -197,45 +197,45 @@ def OutputData(category_map, stream):
     data_list = [c for c in category_map[category]
                  if c[3] or c[4] or c[5] or c[6]]
     stream.write(
-        '  public static final String[] %s_VALUES = new String[]{\n' %
+        b'  public static final String[] %b_VALUES = new String[]{\n' %
         category)
     for _, codes, pua_code, japanese, docomo, softbank, kddi in data_list:
-      stream.write('    %s,\n' % code_generator_util.ToJavaStringLiteral(codes))
-    stream.write('  };\n')
+      stream.write(b'    %b,\n' % code_generator_util.ToJavaStringLiteral(codes))
+    stream.write(b'  };\n')
 
     stream.write(
-        '  public static final String[] %s_PUA_VALUES = new String[]{\n' %
+        b'  public static final String[] %b_PUA_VALUES = new String[]{\n' %
         category)
     for _, codes, pua_code, japanese, docomo, softbank, kddi in data_list:
       stream.write(
-          '    %s,\n' % code_generator_util.ToJavaStringLiteral(pua_code))
-    stream.write('  };\n')
+          b'    %b,\n' % code_generator_util.ToJavaStringLiteral(pua_code))
+    stream.write(b'  };\n')
 
     stream.write(
-        '  public static final String[] UNICODE_%s_NAME = {\n' % category)
+        b'  public static final String[] UNICODE_%b_NAME = {\n' % category)
     for _, codes, pua_code, japanese, docomo, softbank, kddi in data_list:
-      stream.write('    %s, \n' % PreprocessName(japanese))
-    stream.write('  };\n')
+      stream.write(b'    %b, \n' % PreprocessName(japanese))
+    stream.write(b'  };\n')
 
     stream.write(
-        '  public static final String[] DOCOMO_%s_NAME = {\n' % category)
+        b'  public static final String[] DOCOMO_%b_NAME = {\n' % category)
     for _, codes, pua_code, japanese, docomo, softbank, kddi in data_list:
-      stream.write('    %s, \n' % PreprocessName(docomo))
-    stream.write('  };\n')
+      stream.write(b'    %b, \n' % PreprocessName(docomo))
+    stream.write(b'  };\n')
 
     stream.write(
-        '  public static final String[] SOFTBANK_%s_NAME = {\n' % category)
+        b'  public static final String[] SOFTBANK_%b_NAME = {\n' % category)
     for _, codes, pua_code, japanese, docomo, softbank, kddi in data_list:
-      stream.write('    %s, \n' % PreprocessName(softbank))
-    stream.write('  };\n')
+      stream.write(b'    %b, \n' % PreprocessName(softbank))
+    stream.write(b'  };\n')
 
     stream.write(
-        '  public static final String[] KDDI_%s_NAME = {\n' % category)
+        b'  public static final String[] KDDI_%b_NAME = {\n' % category)
     for _, codes, pua_code, japanese, docomo, softbank, kddi in data_list:
-      stream.write('    %s, \n' % PreprocessName(kddi))
-    stream.write('  };\n')
+      stream.write(b'    %b, \n' % PreprocessName(kddi))
+    stream.write(b'  };\n')
 
-  stream.write('}\n')
+  stream.write(b'}\n')
 
 
 def ParseOptions():
@@ -248,10 +248,10 @@ def ParseOptions():
 
 def main():
   options = ParseOptions()
-  with open(options.emoji_data) as stream:
+  with open(options.emoji_data, 'rb') as stream:
     emoji_data = ReadData(stream)
 
-  with open(options.output, 'w') as stream:
+  with open(options.output, 'wb') as stream:
     OutputData(emoji_data, stream)
 
 

@@ -28,7 +28,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-"""Script post-prosessing executables for Windows.
+"""Script post-processing executables for Windows.
 
 postbuilds_win.py --targetpath=my_binary.exe
 """
@@ -66,11 +66,11 @@ def ParseOption():
     open(abs_touch_file_path, 'w').close()
 
 
-class RunOrDieError(StandardError):
+class RunOrDieError(Exception):
   """The exception class for RunOrDie."""
 
   def __init__(self, message):
-    StandardError.__init__(self, message)
+    Exception.__init__(self, message)
 
 
 def RunOrDie(argv):
@@ -94,15 +94,15 @@ def RunOrDie(argv):
 
 def PrintErrorAndExit(error_message):
   """Prints the error message and exists."""
-  print error_message
+  print(error_message)
   sys.exit(1)
 
 
 def ShowHelpAndExit():
   """Shows the help message."""
-  print 'Usage: postbuilds_win.py [ARGS]'
-  print 'This script only supports Windows'
-  print 'See also the comment in the script for typical usage.'
+  print('Usage: postbuilds_win.py [ARGS]')
+  print('This script only supports Windows')
+  print('See also the comment in the script for typical usage.')
   sys.exit(1)
 
 
@@ -110,7 +110,7 @@ def main():
   opts = ParseOption()
 
   if not opts.targetpath:
-    print '--targetpath is not specified'
+    print('--targetpath is not specified')
     sys.exit(1)
 
   if IsWindows():

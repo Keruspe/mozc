@@ -38,7 +38,6 @@ The first line of .tsv file is ignored because it is used as label.
 
 __author__ = "matsuzakit"
 
-import io
 import optparse
 import sys
 import unicodedata
@@ -58,7 +57,8 @@ def ParseSymbolFile(file_name, value_column, category_column,
   """Parses symbol file and returns tag->symbols dictionary."""
   tag2symbol = {}
   is_first_line = True
-  for line in io.open(file_name, encoding='utf-8'):
+  file = open(file_name, encoding='utf-8')
+  for line in file:
     line_parts = line.rstrip().split('\t')
     if is_first_line:
       # Skip the first line, which is used as label.
@@ -77,6 +77,7 @@ def ParseSymbolFile(file_name, value_column, category_column,
       tag2symbol.setdefault(tag, []).append(symbol)
       if tag in expand_variant_tags and symbol != normalized:
         tag2symbol[tag].append(normalized)
+  file.close()
 
   return tag2symbol
 
@@ -110,7 +111,7 @@ def GetStringArrayOfSymbols(tag_name, original_symbols, ordering_rule_list):
   else:
     symbols = original_symbols
 
-  _ESCAPE = (u'"', u'\\')
+  _ESCAPE = ('"', '\\')
   for symbol in symbols:
     # Escape characters (defined above) have to be escaped by backslashes.
     # e.g.
@@ -125,7 +126,7 @@ def GetStringArrayOfSymbols(tag_name, original_symbols, ordering_rule_list):
     #   which include '\u0022' will terminate here.
     # They are not what we want so before such characters we place '\'
     # in order to escape them.
-    line = ['%s\\u%04x' % ('' if c not in _ESCAPE else '\u005c', ord(c))
+    line = ['%s\\u%04x' % ('' if c not in _ESCAPE else '\\u005c', ord(c))
             for c in symbol]
     # The white space is quick fix for the backslash at the tail of symbol.
     lines.append('    "%s",  // %s ' % (''.join(line), symbol))
@@ -135,8 +136,8 @@ def GetStringArrayOfSymbols(tag_name, original_symbols, ordering_rule_list):
 
 def WriteOut(output, tag2symbol, class_name, ordering_rule_list):
   body = [GetStringArrayOfSymbols(tag, symbols, ordering_rule_list)
-          for tag, symbols in tag2symbol.iteritems()]
-  with io.open(output, 'w', encoding='utf-8') as out_file:
+          for tag, symbols in sorted(tag2symbol.items())]
+  with open(output, 'w', encoding='utf-8') as out_file:
     out_file.write(TEMPLATE_CLASS % (PACKAGE_NAME, class_name, '\n'.join(body)))
 
 
@@ -162,12 +163,14 @@ def ParseOption():
 
 def CreateOrderingRuleList(file_name):
   ordering_rule_list = []
-  for line in io.open(file_name, encoding='utf-8'):
+  file = open(file_name, encoding='utf-8')
+  for line in file:
     # Do not forget such line of which content is ' '.
     # Such line has to be appended into the list.
-    if not line.startswith(u'# ') and not line.startswith(u'\n'):
-      value = line.rstrip(u'\r\n')
+    if not line.startswith('# ') and not line.startswith('\n'):
+      value = line.rstrip('\r\n')
       ordering_rule_list.append(value)
+  file.close()
   return ordering_rule_list
 
 
@@ -176,7 +179,7 @@ def main():
   if not (options.input and options.output and options.class_name and
           options.value_column is not None and
           options.category_column is not None):
-    print 'Some options cannot be omitted. See --help.'
+    print('Some options cannot be omitted. See --help.')
     sys.exit(1)
   tag2symbol = ParseSymbolFile(options.input,
                                options.value_column,
